@@ -1,14 +1,17 @@
 import pino from 'pino'
 import type { OAuthClient } from '@atproto/oauth-client-node'
 import { Firehose } from '@atproto/sync'
-import { createDb, migrateToLatest, type Database } from './db'
-import { createBidirectionalResolver, createIdResolver, type BidirectionalResolver } from './id-resolver'
+import {
+  createBidirectionalResolver,
+  createIdResolver,
+  type BidirectionalResolver,
+} from './id-resolver'
 import { createIngester } from './ingester'
 import { createClient } from '../auth/client'
-import { env } from './env'
+import { createStatusStore, type StatusStore } from './status-store'
 
 export type AppContext = {
-  db: Database
+  statusStore: StatusStore
   ingester: Firehose
   logger: pino.Logger
   oauthClient: OAuthClient
@@ -19,14 +22,13 @@ let ctx: Promise<AppContext> | null = null
 
 async function createContext(): Promise<AppContext> {
   const logger = pino({ name: 'nextjs-app' })
-  const db = createDb(env.DB_PATH)
-  await migrateToLatest(db)
-  const oauthClient = await createClient(db)
+  const oauthClient = await createClient()
   const baseIdResolver = createIdResolver()
-  const ingester = createIngester(db, baseIdResolver)
+  const statusStore = createStatusStore()
+  const ingester = createIngester(statusStore, baseIdResolver)
   const resolver = createBidirectionalResolver(baseIdResolver)
   ingester.start()
-  return { db, ingester, logger, oauthClient, resolver }
+  return { statusStore, ingester, logger, oauthClient, resolver }
 }
 
 export async function getContext(): Promise<AppContext> {

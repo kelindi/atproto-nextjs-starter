@@ -27,20 +27,10 @@ export default async function Page() {
         })
     : null
 
-  const statuses = await ctx.db
-    .selectFrom('status')
-    .selectAll()
-    .orderBy('indexedAt', 'desc')
-    .limit(10)
-    .execute()
+  const statuses = await ctx.statusStore.listLatest(10)
 
   const myStatus = agent
-    ? await ctx.db
-        .selectFrom('status')
-        .selectAll()
-        .where('authorDid', '=', agent.assertDid)
-        .orderBy('indexedAt', 'desc')
-        .executeTakeFirst()
+    ? await ctx.statusStore.findLatestForDid(agent.assertDid)
     : undefined
 
   const didHandleMap = await ctx.resolver.resolveDidsToHandles(

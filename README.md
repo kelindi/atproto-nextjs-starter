@@ -7,7 +7,7 @@ It demonstrates how to build an AT Protocol application using the `app` router, 
 
 - OAuth sign in via the AT Protocol
 - Firehose ingestion of custom `xyz.statusphere.status` records
-- SQLite storage using Kysely
+- In-memory storage of status updates and OAuth sessions
 - Example pages for logging in and setting a status
 
 ## Development
@@ -25,12 +25,11 @@ The app will start on [http://localhost:3000](http://localhost:3000).
 
 Copy `.env.template` to `.env` and adjust values as needed. Important settings are:
 
-- `DB_PATH` – location for the SQLite database
 - `COOKIE_SECRET` – secret used for session cookies
 
 ## Project Structure
 
-- `src/lib` – core server utilities such as database setup, OAuth client and firehose ingestion
+- `src/lib` – core server utilities including OAuth client, firehose ingestion and in-memory stores
 - `src/app` – Next.js routes and React pages
 - `src/app/api` – API route handlers replacing the original Express routes
 - `src/lexicon` – generated lexicon types used by the AT Protocol libraries

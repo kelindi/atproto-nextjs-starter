@@ -44,19 +44,12 @@ export async function POST(req: NextRequest) {
     ctx.logger.warn({ err }, 'failed to write record')
     return NextResponse.json({ error: 'failed to write record' }, { status: 500 })
   }
-  try {
-    await ctx.db
-      .insertInto('status')
-      .values({
-        uri,
-        authorDid: agent.assertDid,
-        status: record.status as string,
-        createdAt: record.createdAt,
-        indexedAt: new Date().toISOString(),
-      })
-      .execute()
-  } catch (err) {
-    ctx.logger.warn({ err }, 'failed to update computed view')
-  }
+  await ctx.statusStore.add({
+    uri,
+    authorDid: agent.assertDid,
+    status: record.status as string,
+    createdAt: record.createdAt,
+    indexedAt: new Date().toISOString(),
+  })
   return res
 }
