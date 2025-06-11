@@ -21,6 +21,12 @@ npm run dev
 
 The app will start on [http://localhost:3000](http://localhost:3000).
 
+When you change or add lexicon schemas, regenerate the TypeScript types using:
+
+```bash
+npm run lexgen
+```
+
 ### Environment
 
 Copy `.env.template` to `.env` and adjust values as needed. Important settings are:
@@ -39,15 +45,15 @@ This project follows the [AT Protocol applications guide](https://atproto.com/gu
 
 To add your own schema:
 
-1. Write a Lexicon JSON file describing the collection you want to store on the network. See the `xyz.statusphere.status` schema for an example.
-2. Run the Lexicon CLI to regenerate the TypeScript types and schema dictionary:
+1. Write a Lexicon JSON file describing the collection you want to store on the network. See `lexicons/xyz.statusphere.status.json` for an example.
+2. Place the file in the `lexicons` directory.
+3. Regenerate the TypeScript types and schema dictionary:
 
 ```bash
-npx --yes @atproto/lex-cli gen-ts-obj src/lexicon/lexicons.ts <path-to-json>
-npx --yes @atproto/lex-cli gen-api src/lexicon/types <path-to-json>
+npm run lexgen
 ```
 
-3. Commit the updated files in `src/lexicon`. They are imported by API routes and server components.
+4. Commit the updated files in `src/lexicon`. They are imported by API routes and server components.
 
 ## Building
 

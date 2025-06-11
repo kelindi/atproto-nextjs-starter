@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lexgen": "lex gen-ts-obj src/lexicon/lexicons.ts lexicons/*.json && lex gen-api --yes src/lexicon/types lexicons/*.json"
   },
   "dependencies": {
     "@atproto/api": "^0.13.4",
@@ -24,6 +25,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@atproto/lex-cli": "^0.8.2",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
