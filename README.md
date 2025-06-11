@@ -33,6 +33,21 @@ Copy `.env.template` to `.env` and adjust values as needed. Important settings a
 - `src/app` – Next.js routes and React pages
 - `src/app/api` – API route handlers replacing the original Express routes
 - `src/lexicon` – generated lexicon types used by the AT Protocol libraries
+## Creating new schemas
+
+This project follows the [AT Protocol applications guide](https://atproto.com/guides/applications) and uses [Lexicon](https://github.com/bluesky-social/atproto/blob/main/packages/lexicon) to define record collections.
+
+To add your own schema:
+
+1. Write a Lexicon JSON file describing the collection you want to store on the network. See the `xyz.statusphere.status` schema for an example.
+2. Run the Lexicon CLI to regenerate the TypeScript types and schema dictionary:
+
+```bash
+npx --yes @atproto/lex-cli gen-ts-obj src/lexicon/lexicons.ts <path-to-json>
+npx --yes @atproto/lex-cli gen-api src/lexicon/types <path-to-json>
+```
+
+3. Commit the updated files in `src/lexicon`. They are imported by API routes and server components.
 
 ## Building
 
