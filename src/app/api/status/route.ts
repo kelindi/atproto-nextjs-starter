@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   if (!session.did) {
     return NextResponse.json({ error: 'session required' }, { status: 401 })
   }
-  const body = await req.formData()
+  const body = new URLSearchParams(await req.text())
   const status = body.get('status')
   const agentSession = await ctx.oauthClient.restore(session.did)
   if (!agentSession) return NextResponse.json({ error: 'no session' }, { status: 401 })
@@ -51,5 +51,5 @@ export async function POST(req: NextRequest) {
     createdAt: record.createdAt,
     indexedAt: new Date().toISOString(),
   })
-  return res
+  return NextResponse.json({ uri })
 }

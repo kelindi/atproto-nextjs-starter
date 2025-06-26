@@ -7,7 +7,7 @@ import { Agent } from '@atproto/api'
 
 export default async function Page() {
   const ctx = await getContext()
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const req = { headers: { cookie: cookieStore.toString() } } as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,9 +20,9 @@ export default async function Page() {
     ? await ctx.oauthClient
         .restore(session.did)
         .then((sess) => (sess ? new Agent(sess) : null))
-        .catch(async (err) => {
+        .catch((err) => {
           ctx.logger.warn({ err }, 'oauth restore failed')
-          await session.destroy()
+          // Cannot destroy session in a server component, just return null
           return null
         })
     : null

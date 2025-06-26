@@ -1,5 +1,7 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
 export type Status = {
   uri: string
   authorDid: string
@@ -19,9 +21,32 @@ export default function HomePage({
   profile?: { displayName?: string }
   myStatus?: Status
 }) {
+  const router = useRouter()
   const statusOptions = [
-    '👍','👎','💙','🥹','😧','😤','🙃','😉','😎','🤓','🤨','🥳','😭','😤','🤯','🫡','💀','✊','🤘','👀','🧠','👩‍💻','🧑‍💻','🥷','🧌','🦋','🚀'
+    '👍','👎','💙','🥹','😧','🙃','😉','😎','🤓','🤨','🥳','😭','😤','🤯','🫡','💀','✊','🤘','👀','🧠','👩‍💻','🧑‍💻','🥷','🧌','🦋','🚀'
   ]
+
+  const handleStatusClick = async (status: string) => {
+    try {
+      const response = await fetch('/api/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ status }),
+      })
+      
+      if (response.ok) {
+        // Give the server a moment to process the update
+        setTimeout(() => {
+          router.refresh()
+        }, 100)
+      } else {
+        console.error('Failed to update status:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+    }
+  }
+
   return (
     <div id="root">
       <div className="error"></div>
@@ -49,18 +74,17 @@ export default function HomePage({
             </div>
           )}
         </div>
-        <form action="/api/status" method="post" className="status-options">
+        <div className="status-options">
           {statusOptions.map((status) => (
             <button
               key={status}
               className={myStatus?.status === status ? 'status-option selected' : 'status-option'}
-              name="status"
-              value={status}
+              onClick={() => handleStatusClick(status)}
             >
               {status}
             </button>
           ))}
-        </form>
+        </div>
         {statuses.map((status, i) => {
           const handle = didHandleMap[status.authorDid] || status.authorDid
           const date = ts(status)
