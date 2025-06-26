@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Statusphere Next.js Example
 
-## Getting Started
+This project adapts the [Statusphere example app](https://github.com/bluesky-social/statusphere-example-app) to a Next.js application.
+It demonstrates how to build an AT Protocol application using the `app` router, API routes and server components.
 
-First, run the development server:
+## Features
+
+- OAuth sign in via the AT Protocol
+- Firehose ingestion of custom `xyz.statusphere.status` records
+- In-memory storage of status updates and OAuth sessions
+- Example pages for logging in and setting a status
+
+## Development
+
+Install dependencies and start the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will start on [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+When you change or add lexicon schemas, regenerate the TypeScript types using:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lexgen
+```
 
-## Learn More
+### Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.template` to `.env` and adjust values as needed. Important settings are:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `COOKIE_SECRET` – secret used for session cookies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `src/lib` – core server utilities including OAuth client, firehose ingestion and in-memory stores
+- `src/app` – Next.js routes and React pages
+- `src/app/api` – API route handlers replacing the original Express routes
+- `src/lexicon` – generated lexicon types used by the AT Protocol libraries
+## Creating new schemas
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project follows the [AT Protocol applications guide](https://atproto.com/guides/applications) and uses [Lexicon](https://github.com/bluesky-social/atproto/blob/main/packages/lexicon) to define record collections.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To add your own schema:
+
+1. Write a Lexicon JSON file describing the collection you want to store on the network. See `lexicons/xyz.statusphere.status.json` for an example.
+2. Place the file in the `lexicons` directory.
+3. Regenerate the TypeScript types and schema dictionary:
+
+```bash
+npm run lexgen
+```
+
+4. Commit the updated files in `src/lexicon`. They are imported by API routes and server components.
+
+## Building
+
+```bash
+npm run build
+```
+
+## License
+
+MIT
