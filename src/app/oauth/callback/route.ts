@@ -1,6 +1,7 @@
 import { getContext } from '@/lib/context'
 import { NextRequest, NextResponse } from 'next/server'
 import { getIronSession } from 'iron-session'
+import { sessionOptions, SessionData } from '@/lib/session'
 import { env } from '@/lib/env'
 
 export async function GET(req: NextRequest) {
@@ -14,10 +15,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const { session } = await ctx.oauthClient.callback(params)
-    const sess = await getIronSession<{ did?: string }>(req, res, {
-      cookieName: 'sid',
-      password: env.COOKIE_SECRET,
-    })
+    const sess = await getIronSession<SessionData>(req, res, sessionOptions)
     sess.did = session.did
     await sess.save()
   } catch (err) {

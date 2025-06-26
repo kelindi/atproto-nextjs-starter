@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { cleanEnv, host, port, str, testOnly } from 'envalid'
+import { cleanEnv, host, port, str } from 'envalid'
 
 dotenv.config()
 

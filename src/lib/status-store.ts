@@ -1,3 +1,5 @@
+import { getDatabase } from './database'
+
 export type Status = {
   uri: string
   authorDid: string
@@ -14,29 +16,93 @@ export interface StatusStore {
 }
 
 export function createStatusStore(): StatusStore {
-  let statuses: Status[] = []
+  const db = getDatabase()
+
   return {
     async add(status: Status) {
-      const idx = statuses.findIndex((s) => s.uri === status.uri)
-      if (idx !== -1) {
-        statuses[idx] = status
-      } else {
-        statuses.push(status)
+      try {
+        await db
+          .insertInto('statuses')
+          .values({
+            uri: status.uri,
+            author_did: status.authorDid,
+            status: status.status,
+            created_at: status.createdAt,
+            indexed_at: status.indexedAt,
+          })
+          .onConflict((oc) => oc
+            .column('uri')
+            .doUpdateSet({
+              author_did: status.authorDid,
+              status: status.status,
+              created_at: status.createdAt,
+              indexed_at: status.indexedAt,
+            })
+          )
+          .execute()
+      } catch (error) {
+        console.error('Failed to add status:', error)
+        throw error
       }
     },
+
     async remove(uri: string) {
-      statuses = statuses.filter((s) => s.uri !== uri)
+      try {
+        await db
+          .deleteFrom('statuses')
+          .where('uri', '=', uri)
+          .execute()
+      } catch (error) {
+        console.error('Failed to remove status:', error)
+        throw error
+      }
     },
+
     async listLatest(limit: number) {
-      return statuses
-        .slice()
-        .sort((a, b) => b.indexedAt.localeCompare(a.indexedAt))
-        .slice(0, limit)
+      try {
+        const results = await db
+          .selectFrom('statuses')
+          .selectAll()
+          .orderBy('indexed_at', 'desc')
+          .limit(limit)
+          .execute()
+
+        return results.map(row => ({
+          uri: row.uri,
+          authorDid: row.author_did,
+          status: row.status,
+          createdAt: row.created_at,
+          indexedAt: row.indexed_at,
+        }))
+      } catch (error) {
+        console.error('Failed to list latest statuses:', error)
+        return []
+      }
     },
+
     async findLatestForDid(did: string) {
-      return statuses
-        .filter((s) => s.authorDid === did)
-        .sort((a, b) => b.indexedAt.localeCompare(a.indexedAt))[0]
+      try {
+        const result = await db
+          .selectFrom('statuses')
+          .selectAll()
+          .where('author_did', '=', did)
+          .orderBy('indexed_at', 'desc')
+          .limit(1)
+          .executeTakeFirst()
+
+        if (!result) return undefined
+
+        return {
+          uri: result.uri,
+          authorDid: result.author_did,
+          status: result.status,
+          createdAt: result.created_at,
+          indexedAt: result.indexed_at,
+        }
+      } catch (error) {
+        console.error('Failed to find latest status for DID:', error)
+        return undefined
+      }
     },
   }
 }

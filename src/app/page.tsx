@@ -2,7 +2,7 @@ import HomePage from '@/app/components/HomePage'
 import { getContext } from '@/lib/context'
 import { cookies } from 'next/headers'
 import { getIronSession } from 'iron-session'
-import { env } from '@/lib/env'
+import { sessionOptions, SessionData } from '@/lib/session'
 import { Agent } from '@atproto/api'
 
 export default async function Page() {
@@ -12,10 +12,8 @@ export default async function Page() {
   const req = { headers: { cookie: cookieStore.toString() } } as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = {} as any
-  const session = await getIronSession<{ did?: string }>(req, res, {
-    cookieName: 'sid',
-    password: env.COOKIE_SECRET,
-  })
+  const session = await getIronSession<SessionData>(req, res, sessionOptions)
+  
   const agent = session.did
     ? await ctx.oauthClient
         .restore(session.did)
@@ -58,6 +56,7 @@ export default async function Page() {
       didHandleMap={didHandleMap}
       profile={profile}
       myStatus={myStatus}
+      currentUserDid={agent?.assertDid}
     />
   )
 }
